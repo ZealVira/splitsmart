@@ -1,0 +1,30 @@
+<!-- templates/login.html -->
+{% extends 'base.html' %}
+{% block title %}Login | SplitSmart{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+  <div class="col-md-6 col-lg-5">
+    <div class="card p-4">
+      <h3 class="text-center mb-4 text-primary">Login</h3>
+      <form method="POST">
+        {% csrf_token %}
+        <div class="mb-3">
+          <label for="email" class="form-label">Email</label>
+          <input type="text" name="email" id="email" class="form-control" required />
+        </div>
+        <div class="mb-3">
+          <label for="password" class="form-label">Password</label>
+          <input type="password" name="password" id="password" class="form-control" required />
+        </div>
+        <div class="d-grid">
+          <button type="submit" class="btn btn-brand">Login</button>
+        </div>
+        <div class="text-center mt-3">
+          <small>Don't have an account? <a href="/signup">Register here</a></small>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
