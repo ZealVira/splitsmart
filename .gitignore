@@ -1,0 +1,65 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Django specific
+*.log
+*.pot
+*.pyc
+*.pyo
+*.db
+*.sqlite3
+db.sqlite3
+*.mo
+
+# Environment
+.env
+venv/
+env/
+ENV/
+.venv/
+.env.*
+
+# VS Code
+.vscode/
+
+# macOS
+.DS_Store
+
+# PyCharm
+.idea/
+
+# Migrations (optional)
+# You may choose to ignore them only if you regenerate them per environment
+# **/migrations/
+# !**/migrations/__init__.py
+
+# Media files
+/media/
+media/
+
+# Static files (if collected locally)
+staticfiles/
+static/
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+
+# MyPy and other lint tools
+.mypy_cache/
+.pytest_cache/
+.dmypy.json
+.pyre/
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
