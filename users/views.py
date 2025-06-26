@@ -1,10 +1,16 @@
 from django.shortcuts import render, redirect
 from .models import User
+from groups.models import Group, GroupMember
+from django.db.models import Q
 from django.contrib.auth import authenticate, login 
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 
+@login_required(login_url='login')
 def index(request):
-    return render(request, 'index.html')
+    member = GroupMember.objects.filter(user=request.user).values_list('group_id', flat=True)
+    groups = Group.objects.filter(Q(created_by=request.user) | Q(id__in=member)).order_by('-created_at')
+    return render(request, 'index.html', {'groups': groups})
 
 def signup_view(request):
     if request.method == 'POST':

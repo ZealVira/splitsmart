@@ -14,18 +14,25 @@
   <!-- List of Groups (if any) -->
   <div>
     {% if groups %}
-      <h5 class="mb-3">Your Groups</h5>
-      <ul class="list-group">
-        {% for group in groups %}
-          <li class="list-group-item d-flex justify-content-between align-items-center">
-            {{ group.group_name }}
-            <small class="text-muted">{{ group.created_at|date:"M d, Y" }}</small>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <div class="alert alert-info">You haven't created any groups yet. Use the "+ Create Group" button to get started.</div>
-    {% endif %}
+    <div class="row">
+      {% for group in groups %}
+        <div class="col-md-4 mb-4">
+          <div class="card shadow-sm h-100 border-0">
+            <div class="card-body">
+              <h5 class="card-title">{{ group.group_name }}</h5>
+              <p class="card-text text-muted" style="min-height: 60px;">{{ group.description|truncatewords:15 }}</p>
+              <a href="{% url 'group_detail' group.pk %}" class="btn btn-sm btn-brand">View Details</a>
+            </div>
+            <div class="card-footer text-muted small">
+              Created on {{ group.created_at|date:"M d, Y" }}
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <p class="text-muted">No groups created yet.</p>
+  {% endif %}
   </div>
 </div>
 
@@ -33,7 +40,7 @@
 <div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content rounded-4 shadow">
-      <form method="POST" action="/create_group">
+      <form method="POST" action="{% url 'create_group' %}">
         {% csrf_token %}
         <div class="modal-header">
           <h5 class="modal-title" id="createGroupModalLabel">Create New Group</h5>
@@ -46,9 +53,9 @@
         
         <div class="modal-body">
           <label for="description" class="form-label">Description</label>
-          <textarea name="description" id="description" class="form-control" rows="3" required></textarea>
+          <textarea name="description" id="description" class="form-control" rows="3"></textarea>
         </div>
-        
+
         <div class="modal-footer">
           <button type="submit" class="btn btn-brand">Create Group</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
