@@ -24,19 +24,21 @@
                     <ul class="dropdown-menu dropdown-menu-end shadow">
                       <li>
                         <button class="dropdown-item" data-bs-toggle="modal" data-bs-target="#addMemberModal-{{ group.id }}">
-                            Add Member
+                          <i class="bi bi-person-plus me-2"></i>Add Member
                         </button>
                       </li>
                       <li>
                         <button class="dropdown-item text-warning" data-bs-toggle="modal" data-bs-target="#removeMemberModal-{{ group.id }}">
-                            Remove Member
+                          <i class="bi bi-person-x me-2"></i>Remove Member
                         </button>
                       </li>
-
+                      <li><hr class="dropdown-divider"></li>
                       <li>
                         <form method="POST" action="{% url 'delete_group' group.id %}">
                           {% csrf_token %}
-                          <button type="submit" class="dropdown-item text-danger">Delete Group</button>
+                          <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-trash me-2"></i>Delete Group
+                          </button>
                         </form>
                       </li>
                     </ul>
@@ -45,7 +47,12 @@
               </div>
 
               <p class="card-text text-muted">{{ group.description|truncatewords:15 }}</p>
-              <a href="{% url 'group_detail' group.pk %}" class="btn btn-sm btn-brand">View Details</a>
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="badge bg-light text-dark">
+                  <i class="bi bi-people"></i> {{ group.members.count }} members
+                </span>
+                <a href="{% url 'group_detail' group.pk %}" class="btn btn-sm btn-brand">View Details</a>
+              </div>
             </div>
             <div class="card-footer text-muted small">
               Created on {{ group.created_at|date:"M d, Y" }}
@@ -53,38 +60,82 @@
           </div>
         </div>
 
-        <!-- Add Member Modal for each group -->
-        <div class="modal fade" id="addMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
+        <!-- Add Member Modal -->
+        <div class="modal fade" id="addMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="addMemberModalLabel-{{ group.id }}" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content rounded-4 shadow">
               <form method="POST" action="{% url 'add_member' group.id %}">
                 {% csrf_token %}
                 <div class="modal-header">
-                  <h5 class="modal-title" id="addMemberModalLabel">Add Member to {{ group.group_name }}</h5>
+                  <h5 class="modal-title" id="addMemberModalLabel-{{ group.id }}">Add Member to {{ group.group_name }}</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                  <label for="member_identifier" class="form-label">Username or Email</label>
-                  <input type="text" name="member_identifier" class="form-control" placeholder="e.g. user@example.com" required>
+                  <div class="mb-3">
+                    <label for="email-{{ group.id }}" class="form-label">User Email</label>
+                    <input type="email" class="form-control" id="email-{{ group.id }}" name="email" required placeholder="user@example.com">
+                    <div class="form-text">Enter the email of the user you want to add</div>
+                  </div>
                 </div>
                 <div class="modal-footer">
-                  <button type="submit" class="btn btn-brand">Add</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-brand">Add Member</button>
                 </div>
               </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Remove Member Modal -->
+        <div class="modal fade" id="removeMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="removeMemberModalLabel-{{ group.id }}" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content rounded-4 shadow">
+              <div class="modal-header">
+                <h5 class="modal-title" id="removeMemberModalLabel-{{ group.id }}">Remove Member from {{ group.group_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                {% with group.members.all as members %}
+                  {% if members|length > 1 %}
+                    <div class="list-group">
+                      {% for member in members %}
+                        {% if member != request.user %}
+                          <div class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                              <strong>{{ member.username }}</strong>
+                              <div class="text-muted small">{{ member.email }}</div>
+                            </div>
+                            <form method="POST" action="{% url 'remove_member' group.id member.id %}">
+                              {% csrf_token %}
+                              <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="bi bi-trash"></i> Remove
+                              </button>
+                            </form>
+                          </div>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                  {% else %}
+                    <div class="alert alert-info">No members to remove (you can't remove yourself as the last member)</div>
+                  {% endif %}
+                {% endwith %}
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+              </div>
             </div>
           </div>
         </div>
       {% endfor %}
     </div>
   {% else %}
-    <div class="alert alert-info">You haven't created or joined any groups yet.</div>
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>You haven't created or joined any groups yet.
+    </div>
   {% endif %}
 </div>
 
-
-
-<!--Create Group Modal -->
+<!-- Create Group Modal -->
 <div class="modal fade" id="createGroupModal" tabindex="-1" aria-labelledby="createGroupModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content rounded-4 shadow">
@@ -95,93 +146,21 @@
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <label for="group_name" class="form-label">Group Name</label>
-          <input type="text" name="group_name" id="group_name" class="form-control" required />
+          <div class="mb-3">
+            <label for="group_name" class="form-label">Group Name</label>
+            <input type="text" class="form-control" id="group_name" name="group_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="description" class="form-label">Description (Optional)</label>
+            <textarea class="form-control" id="description" name="description" rows="3"></textarea>
+          </div>
         </div>
-        
-        <div class="modal-body">
-          <label for="description" class="form-label">Description</label>
-          <textarea name="description" id="description" class="form-control" rows="3"></textarea>
-        </div>
-
         <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-brand">Create Group</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 </div>
-
-
-<!-- Remove Member Modal -->
-<div class="modal fade" id="removeMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="removeMemberModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content rounded-4 shadow">
-      <div class="modal-header">
-        <h5 class="modal-title">Remove Member from {{ group.group_name }}</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      
-      <div class="modal-body">
-        {% if members %}
-          <ul class="list-group">
-            {% for member in members %}
-              {% if member.user != request.user %}  <!-- Don't allow self-remove -->
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                  {{ member.user.username }}
-                  <form method="POST" action="{% url 'remove_member' group.id member.user.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
-                      <i class="bi bi-trash"></i>
-                    </button>
-                  </form>
-                </li>
-              {% endif %}
-            {% endfor %}
-          </ul>
-        {% else %}
-          <p class="text-muted">No members in this group.</p>
-        {% endif %}
-      </div>
-
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Add member modal -->
-<div class="modal fade" id="addMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="addMemberModalLabel-{{ group.id }}" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content rounded-4 shadow">
-      <form method="POST" action="{% url 'add_member' group.id %}">
-        {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title" id="addMemberModalLabel-{{ group.id }}">Add Member to {{ group.group_name }}</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-
-        <div class="modal-body">
-          <label for="email-{{ group.id }}" class="form-label">Enter Email</label>
-          <input type="email" name="email" id="email-{{ group.id }}" class="form-control" placeholder="e.g. john@example.com" required>
-          <small class="text-muted">Enter a valid email of an existing user.</small>
-        </div>
-
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-brand">Add Member</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-
-
-
-
-
-
 {% endblock %}

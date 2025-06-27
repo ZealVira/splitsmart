@@ -1,8 +1,8 @@
-from django.contrib.auth.models import AbstractUser
-from django.db import models
 from django.contrib.auth import get_user_model
+from django.db import models
 
 User = get_user_model()
+
 
 class Group(models.Model):
     group_name = models.CharField(max_length=100, null=False)
@@ -11,8 +11,7 @@ class Group(models.Model):
     created_by = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        return self.group_name + ' created by ' + str(self.created_by)
-    
+        return self.group_name + " created by " + str(self.created_by)
 
 
 class GroupMember(models.Model):
@@ -21,8 +20,7 @@ class GroupMember(models.Model):
     joined_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        unique_together = ('group', 'user')
+        unique_together = ("group", "user")
 
     def __str__(self):
         return f"{self.user.email} is a member of {self.group.group_name}"
-    
