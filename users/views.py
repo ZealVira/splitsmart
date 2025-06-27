@@ -2,15 +2,19 @@ from django.shortcuts import render, redirect
 from .models import User
 from groups.models import Group, GroupMember
 from django.db.models import Q
-from django.contrib.auth import authenticate, login 
+from django.contrib.auth import authenticate, login, logout 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 
 @login_required(login_url='login')
 def index(request):
+    user = request.user
+    # list the groups created by the user
+    group_admin = Group.objects.filter(created_by=user).values_list('id', flat=True)
+    print("User is admin in groups:", group_admin)
     member = GroupMember.objects.filter(user=request.user).values_list('group_id', flat=True)
     groups = Group.objects.filter(Q(created_by=request.user) | Q(id__in=member)).order_by('-created_at')
-    return render(request, 'index.html', {'groups': groups})
+    return render(request, 'index.html', {'groups': groups, 'group_admin': group_admin})
 
 def signup_view(request):
     if request.method == 'POST':
@@ -51,3 +55,9 @@ def login_view(request):
 
     return render(request, 'login.html')
 # Create your views here.
+
+
+def logout_view(request):
+    logout(request)
+    messages.success(request, "Logged out successfully.")
+    return redirect('login')
