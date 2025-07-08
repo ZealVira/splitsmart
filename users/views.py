@@ -18,7 +18,6 @@ def index(request):
 
 def signup_view(request):
     if request.method == 'POST':
-        
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
