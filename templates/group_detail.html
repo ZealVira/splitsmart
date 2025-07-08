@@ -1,117 +1,196 @@
 {% extends 'base.html' %}
-{% block title %}Group Details | SplitSmart{% endblock %}
+{% load static %}
+{% block title %}{{ group.group_name }} | SplitSmart{% endblock %}
 
 {% block content %}
-<div class="container mt-5">
-  <!-- Header -->
-  <div class="mb-4">
-    <h2 class="text-primary">{{ group.group_name }}</h2>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <p class="text-muted">Created by <strong>{{ group.created_by.username }}</strong> on {{ group.created_at|date:"M d, Y" }}</p>
-      <a href="{% url 'index' %}" class="btn btn-outline-secondary me-2">← Back to Dashboard</a>
-    </div>
-  </div>
-
-  <!-- Description -->
-  <div class="mb-4">
-    <h5 class="mb-2">Group Description</h5>
-    <form method="POST" action="{% url 'update_group_description' group.id %}">
-      {% csrf_token %}
-      <textarea name="description" rows="3"
-        class="form-control shadow-sm rounded">{{ group.description|default_if_none:"" }}</textarea>
-      <div class="mt-2 text-end">
-        <button type="submit" class="btn btn-sm btn-outline-primary">Save Description</button>
+<div class="container py-4">
+  <!-- Header Section -->
+  <div class="d-flex justify-content-between align-items-start mb-4">
+    <div>
+      <h2 class="fw-bold text-dark mb-2">{{ group.group_name }}</h2>
+      <div class="d-flex align-items-center text-muted">
+        <span>Created by </span>
+        <div class="d-flex align-items-center ms-2">
+          {% if group.created_by.profile.avatar %}
+          <img src="{{ group.created_by.profile.avatar.url }}" 
+               class="rounded-circle me-2" 
+               width="24" 
+               height="24"
+               alt="{{ group.created_by.username }}"
+               onerror="this.onerror=null;this.src='{% static 'images/default-avatar.svg' %}'">
+          {% else %}
+          <div class="avatar-placeholder rounded-circle me-2 d-flex align-items-center justify-content-center bg-primary-soft text-primary" 
+               style="width: 24px; height: 24px; font-size: 10px;">
+            {{ group.created_by.username|first|upper }}
+          </div>
+          {% endif %}
+          <strong>{{ group.created_by.username }}</strong>
+        </div>
+        <span class="mx-2">•</span>
+        <span>{{ group.created_at|date:"M d, Y" }}</span>
       </div>
-    </form>
+    </div>
+    <a href="{% url 'index' %}" class="btn btn-outline-secondary">
+      <i class="bi bi-arrow-left me-1"></i> Back
+    </a>
   </div>
 
-  <!-- Actions -->
-  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-    <h5 class="mb-0">Group Members</h5>
-    <div class="d-flex gap-2">
-      {% if is_admin %}
-      <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMemberModal">
-        <i class="bi bi-person-plus me-1"></i> Add Member
-      </button>
-      {% endif %}
-
-      {% if not is_admin %}
-      <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmLeaveModal">
-        <i class="bi bi-box-arrow-right me-1"></i> Leave Group
-      </button>
-      {% endif %}
+  <!-- Description Card -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+      <h5 class="card-title text-dark mb-3">Group Description</h5>
+      <form method="POST" action="{% url 'update_group_description' group.id %}">
+        {% csrf_token %}
+        <textarea name="description" rows="3"
+          class="form-control border-0 bg-light rounded-3">{{ group.description|default_if_none:"" }}</textarea>
+        <div class="mt-3 text-end">
+          <button type="submit" class="btn btn-sm btn-brand">Save Changes</button>
+        </div>
+      </form>
     </div>
   </div>
 
-  {% if members %}
-  <div class="row row-cols-1 row-cols-md-3 g-3">
-    {% for member in members %}
-    <div class="col">
-      <div class="card shadow-sm border-0 h-100">
-        <div class="card-body d-flex align-items-center">
-          <i class="bi bi-person-circle text-secondary me-3 fs-3"></i>
-          <span class="fw-semibold">{{ member.user.username }}</span>
+  <!-- Members Section -->
+  <div class="card border-0 shadow-sm">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h5 class="card-title text-dark mb-0">Group Members</h5>
+        <div class="d-flex gap-2">
+          {% if is_admin %}
+          <button class="btn btn-sm btn-brand" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+            <i class="bi bi-person-plus me-1"></i> Add Member
+          </button>
+          {% endif %}
+
+          {% if not is_admin %}
+          <button class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#confirmLeaveModal">
+            <i class="bi bi-box-arrow-right me-1"></i> Leave
+          </button>
+          {% endif %}
         </div>
       </div>
-    </div>
-    {% endfor %}
-  </div>
-  {% else %}
-  <p class="text-muted">No members added yet.</p>
-  {% endif %}
-</div>
 
-<!-- Reserved space for charts/payment record -->
-<div class="mb-5">
-  <h5 class="mb-3">Payment Records & Insights</h5>
-  <div class="p-4 border rounded bg-light text-muted text-center">
-    📊 Payment data and graphs will appear here.
+      {% if members %}
+      <div class="row row-cols-1 row-cols-md-3 g-3">
+        {% for member in members %}
+        <div class="col">
+          <div class="card border-0 bg-light h-100">
+            <div class="card-body d-flex align-items-center">
+              {% if member.user.profile.avatar %}
+              <img src="{{ member.user.profile.avatar.url }}" 
+                   class="rounded-circle me-3" 
+                   width="40" 
+                   height="40"
+                   alt="{{ member.user.username }}"
+                   onerror="this.onerror=null;this.src='{% static 'images/default-avatar.svg' %}'">
+              {% else %}
+              <div class="avatar-placeholder rounded-circle me-3 d-flex align-items-center justify-content-center bg-primary-soft text-primary" 
+                   style="width: 40px; height: 40px;">
+                {{ member.user.username|first|upper }}
+              </div>
+              {% endif %}
+              <div>
+                <h6 class="mb-0">{{ member.user.username }}</h6>
+                <small class="text-muted">
+                  {% if member.user == group.created_by %}
+                  <span class="badge bg-primary-soft text-primary">Admin</span>
+                  {% else %}
+                  Member
+                  {% endif %}
+                </small>
+              </div>
+              {% if is_admin and member.user != request.user %}
+              <div class="ms-auto">
+                <form method="POST" action="{% url 'remove_member' group.id member.user.id %}" class="d-inline">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-sm btn-link text-danger p-0" title="Remove">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </form>
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="text-center py-4">
+        <img src="{% static 'images/add-members.svg' %}" class="img-fluid mb-3" style="max-width: 200px;" alt="No members">
+        <p class="text-muted">No members added yet</p>
+        {% if is_admin %}
+        <button class="btn btn-brand mt-2" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+          <i class="bi bi-person-plus me-1"></i> Add First Member
+        </button>
+        {% endif %}
+      </div>
+      {% endif %}
+    </div>
   </div>
-</div>
+
+  <!-- Payment Records Section -->
+  <div class="card border-0 shadow-sm mt-4">
+    <div class="card-body">
+      <h5 class="card-title text-dark mb-3">Payment Records</h5>
+      <div class="text-center py-4 bg-light rounded-3">
+        <img src="{% static 'images/payment-chart.svg' %}" class="img-fluid mb-3" style="max-width: 300px;" alt="Payment chart">
+        <h6 class="text-dark">Payment insights coming soon</h6>
+        <p class="text-muted">Track balances and expenses with visual reports</p>
+        <button class="btn btn-outline-primary" disabled>
+          <i class="bi bi-plus-circle me-1"></i> Add Expense
+        </button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- Add Member Modal -->
 <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content rounded-4 shadow">
+    <div class="modal-content border-0 shadow">
       <form method="POST" action="{% url 'add_member' group.id %}">
         {% csrf_token %}
-        <div class="modal-header">
-          <h5 class="modal-title" id="addMemberModalLabel">Add Member to {{ group.group_name }}</h5>
+        <div class="modal-header border-0">
+          <h5 class="modal-title" id="addMemberModalLabel">Add Member</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <label for="email" class="form-label">Enter Email</label>
-          <input type="email" name="email" id="email" class="form-control" placeholder="e.g. john@example.com" required>
-          <small class="text-muted">Enter a valid email of an existing user.</small>
+          <div class="mb-3">
+            <label for="email" class="form-label">Member Email</label>
+            <input type="email" name="email" id="email" class="form-control" placeholder="user@example.com" required>
+            <small class="text-muted">User must have an existing account</small>
+          </div>
         </div>
-        <div class="modal-footer">
+        <div class="modal-footer border-0">
+          <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
           <button type="submit" class="btn btn-brand">Add Member</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-
 <!-- Leave Group Confirmation Modal -->
 <div class="modal fade" id="confirmLeaveModal" tabindex="-1" aria-labelledby="confirmLeaveModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content rounded-4 shadow">
-      <div class="modal-header">
-        <h5 class="modal-title text-danger" id="confirmLeaveModalLabel">Confirm Leave</h5>
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger" id="confirmLeaveModalLabel">Leave Group?</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p>Are you sure you want to leave the group <strong>{{ group.group_name }}</strong>? This action cannot be undone.</p>
+        <p>You're about to leave <strong>{{ group.group_name }}</strong>. This action cannot be undone.</p>
+        <div class="alert alert-warning mt-3">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          You'll lose access to all group expenses and history.
+        </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer border-0">
+        <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
         <form method="POST" action="{% url 'leave_group' group.id %}">
           {% csrf_token %}
-          <button type="submit" class="btn btn-danger">Yes, Leave Group</button>
+          <button type="submit" class="btn btn-danger">Leave Group</button>
         </form>
-        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
       </div>
     </div>
   </div>
