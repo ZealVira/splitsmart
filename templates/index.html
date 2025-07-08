@@ -32,7 +32,9 @@
                       <li>
                         <form method="POST" action="{% url 'delete_group' group.id %}">
                           {% csrf_token %}
-                          <button type="submit" class="dropdown-item text-danger">Delete Group</button>
+                          <button type="submit" class="dropdown-item text-danger">
+                            <i class="bi bi-trash me-2"></i>Delete Group
+                          </button>
                         </form>
                       </li>
                     </ul>
@@ -55,11 +57,14 @@
 
         <!-- Add Member Modal -->
         <div class="modal fade" id="addMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="addMemberModalLabel-{{ group.id }}" aria-hidden="true">
+        <!-- Add Member Modal -->
+        <div class="modal fade" id="addMemberModal-{{ group.id }}" tabindex="-1" aria-labelledby="addMemberModalLabel-{{ group.id }}" aria-hidden="true">
           <div class="modal-dialog">
             <div class="modal-content rounded-4 shadow">
               <form method="POST" action="{% url 'add_member' group.id %}">
                 {% csrf_token %}
                 <div class="modal-header">
+                  <h5 class="modal-title" id="addMemberModalLabel-{{ group.id }}">Add Member to {{ group.group_name }}</h5>
                   <h5 class="modal-title" id="addMemberModalLabel-{{ group.id }}">Add Member to {{ group.group_name }}</h5>
                   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
@@ -71,6 +76,7 @@
                 <div class="modal-footer">
                   <button type="submit" class="btn btn-brand">Add Member</button>
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                  <button type="submit" class="btn btn-brand">Add Member</button>
                 </div>
               </form>
             </div>
@@ -118,7 +124,9 @@
       {% endfor %}
     </div>
   {% else %}
-    <div class="alert alert-info">You haven't created or joined any groups yet.</div>
+    <div class="alert alert-info">
+      <i class="bi bi-info-circle me-2"></i>You haven't created or joined any groups yet.
+    </div>
   {% endif %}
 </div>
 
