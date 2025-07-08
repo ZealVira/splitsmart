@@ -35,7 +35,11 @@ def create_group(request):
 def group_detail(request, pk):
     group = get_object_or_404(Group, pk=pk)
     members = GroupMember.objects.filter(group=group)
-    return render(request, 'group_detail.html', {'group': group, 'members': members})
+    is_admin = request.user == group.created_by
+    print(request.user, ' is',  is_admin)
+    return render(request, 'group_detail.html', {'group': group, 
+                                                 'members': members, 
+                                                 'is_admin': is_admin})
 
 
 @login_required(login_url='login')
@@ -100,3 +104,13 @@ def leave_group(request, group_id):
             messages.warning(request, "You are not a member of this group.")
         
     return redirect('index')
+
+
+def update_group_description(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+    if request.method == 'POST':
+        description = request.POST.get('description').strip()
+        group.description = description
+        group.save()
+    
+    return redirect('group_detail', pk=pk)

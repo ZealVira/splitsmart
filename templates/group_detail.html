@@ -3,41 +3,74 @@
 
 {% block content %}
 <div class="container mt-5">
-  <h2 class="text-primary">{{ group.group_name }}</h2>
-  <p class="text-muted">Created by {{ group.created_by.username }} on {{ group.created_at|date:"M d, Y" }}</p>
-
-  {% if group.description %}
-    <div class="mb-4">
-      <h5>Description</h5>
-      <p>{{ group.description }}</p>
-    </div>
-  {% endif %}
-    <div>
-
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">Add Member</button>
-    </div>
+  <!-- Header -->
   <div class="mb-4">
-    <h5>Members</h5>
-    {% if members %}
-      <ul class="list-group">
-        {% for member in members %}
-          <li class="list-group-item">{{ member.user.username }}</li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p class="text-muted">No members added yet.</p>
-    {% endif %}
+    <h2 class="text-primary">{{ group.group_name }}</h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <p class="text-muted">Created by <strong>{{ group.created_by.username }}</strong> on {{ group.created_at|date:"M d, Y" }}</p>
+      <a href="{% url 'index' %}" class="btn btn-outline-secondary me-2">← Back to Dashboard</a>
+    </div>
   </div>
 
-  <a href="{% url 'index' %}" class="btn btn-secondary mt-3">← Back to Dashboard</a>
-  <form method="POST" action="{% url 'leave_group' group.id %}" class="d-inline-block">
+  <!-- Description -->
+  <div class="mb-4">
+    <h5 class="mb-2">Group Description</h5>
+    <form method="POST" action="{% url 'update_group_description' group.id %}">
       {% csrf_token %}
-      <button type="submit" class="btn btn-sm btn-outline-secondary">Leave Group</button>
-  </form>
+      <textarea name="description" rows="3"
+        class="form-control shadow-sm rounded">{{ group.description|default_if_none:"" }}</textarea>
+      <div class="mt-2 text-end">
+        <button type="submit" class="btn btn-sm btn-outline-primary">Save Description</button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+    <h5 class="mb-0">Group Members</h5>
+    <div class="d-flex gap-2">
+      {% if is_admin %}
+      <button class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+        <i class="bi bi-person-plus me-1"></i> Add Member
+      </button>
+      {% endif %}
+
+      {% if not is_admin %}
+      <button class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#confirmLeaveModal">
+        <i class="bi bi-box-arrow-right me-1"></i> Leave Group
+      </button>
+      {% endif %}
+    </div>
+  </div>
+
+  {% if members %}
+  <div class="row row-cols-1 row-cols-md-3 g-3">
+    {% for member in members %}
+    <div class="col">
+      <div class="card shadow-sm border-0 h-100">
+        <div class="card-body d-flex align-items-center">
+          <i class="bi bi-person-circle text-secondary me-3 fs-3"></i>
+          <span class="fw-semibold">{{ member.user.username }}</span>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted">No members added yet.</p>
+  {% endif %}
 </div>
 
-<!-- Modal for adding members -->
-<!-- templates/group/add_member_modal.html -->
+<!-- Reserved space for charts/payment record -->
+<div class="mb-5">
+  <h5 class="mb-3">Payment Records & Insights</h5>
+  <div class="p-4 border rounded bg-light text-muted text-center">
+    📊 Payment data and graphs will appear here.
+  </div>
+</div>
+</div>
+
+<!-- Add Member Modal -->
 <div class="modal fade" id="addMemberModal" tabindex="-1" aria-labelledby="addMemberModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content rounded-4 shadow">
@@ -47,13 +80,11 @@
           <h5 class="modal-title" id="addMemberModalLabel">Add Member to {{ group.group_name }}</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
-
         <div class="modal-body">
           <label for="email" class="form-label">Enter Email</label>
           <input type="email" name="email" id="email" class="form-control" placeholder="e.g. john@example.com" required>
           <small class="text-muted">Enter a valid email of an existing user.</small>
         </div>
-
         <div class="modal-footer">
           <button type="submit" class="btn btn-brand">Add Member</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
@@ -64,7 +95,26 @@
 </div>
 
 
-
+<!-- Leave Group Confirmation Modal -->
+<div class="modal fade" id="confirmLeaveModal" tabindex="-1" aria-labelledby="confirmLeaveModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title text-danger" id="confirmLeaveModalLabel">Confirm Leave</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p>Are you sure you want to leave the group <strong>{{ group.group_name }}</strong>? This action cannot be undone.</p>
+      </div>
+      <div class="modal-footer">
+        <form method="POST" action="{% url 'leave_group' group.id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Yes, Leave Group</button>
+        </form>
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% endblock %}
-
