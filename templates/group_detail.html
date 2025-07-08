@@ -30,6 +30,10 @@
   </div>
 
   <a href="{% url 'index' %}" class="btn btn-secondary mt-3">← Back to Dashboard</a>
+  <form method="POST" action="{% url 'leave_group' group.id %}" class="d-inline-block">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-sm btn-outline-secondary">Leave Group</button>
+  </form>
 </div>
 
 <!-- Modal for adding members -->

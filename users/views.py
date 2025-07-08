@@ -56,8 +56,11 @@ def login_view(request):
     return render(request, 'login.html')
 # Create your views here.
 
-
+@login_required(login_url='login')
 def logout_view(request):
     logout(request)
     messages.success(request, "Logged out successfully.")
     return redirect('login')
+
+def landing_view(request):
+    return render(request, 'landing.html')

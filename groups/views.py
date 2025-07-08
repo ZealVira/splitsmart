@@ -45,16 +45,20 @@ def add_member(request, group_id):
     if request.method == 'POST':
         email = request.POST.get('email')
         
-        user = User.objects.get(email=email)
-        if GroupMember.objects.filter(group=group, user=user).exists():
-            messages.error(request, "User is already a member of this group.")
-        else:
-            GroupMember.objects.create(group=group, user=user)
-            messages.success(request, f"{user.email} has been added to the group.")
+        try:
+            user = User.objects.get(email=email)
+            print("User to be added:", user.email)
         
+            if GroupMember.objects.filter(group=group, user=user).exists():
+                messages.error(request, "User is already a member of this group.")
+            else:
+                GroupMember.objects.create(group=group, user=user)
+                messages.success(request, f"{user.email} has been added to the group.")
+        
+        except User.DoesNotExist:
+            messages.error(request, "User with this email does not exist.")
+
     return redirect('group_detail', pk=group_id)
-
-
 
 
 def delete_group(request, group_id):
@@ -80,5 +84,19 @@ def remove_member(request, group_id, user_id):
             messages.success(request, "Member removed.")
         else:
             messages.warning(request, "User is not a member.")
+        
+    return redirect('index')
+
+
+def leave_group(request, group_id):
+    if request.method == 'POST':
+        group = get_object_or_404(Group, pk=group_id)
+        member = GroupMember.objects.filter(group=group, user=request.user).first()
+        
+        if member:
+            member.delete()
+            messages.success(request, "You have left the group.")
+        else:
+            messages.warning(request, "You are not a member of this group.")
         
     return redirect('index')

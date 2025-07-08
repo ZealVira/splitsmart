@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome to SplitSmart{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="text-center py-5 mt-4 rounded" style="background: linear-gradient(to right, #4F46E5, #6366F1); color: white;">
+  <div class="container">
+    <h1 class="display-4 fw-bold mb-3">Simplify Group Expenses with SplitSmart</h1>
+    <p class="lead mb-4">Invite anyone by email, manage group balances effortlessly, and never lose track of who owes what.</p>
+    <a href="{% url 'create_group' %}" class="btn btn-light btn-lg fw-semibold px-4">Create Your First Group</a>
+  </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5 bg-white">
+  <div class="container">
+    <div class="row text-center">
+      <div class="col-md-4 mb-4">
+        <div class="fs-1 text-primary mb-3"><i class="bi bi-people-fill"></i></div>
+        <h5 class="fw-bold">Effortless Group Creation</h5>
+        <p>Create and manage shared groups for trips, events, or households with ease.</p>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="fs-1 text-primary mb-3"><i class="bi bi-envelope-plus-fill"></i></div>
+        <h5 class="fw-bold">Invite Anyone by Email</h5>
+        <p>Even if they're not signed up—just enter their email and we’ll take care of the rest.</p>
+      </div>
+      <div class="col-md-4 mb-4">
+        <div class="fs-1 text-primary mb-3"><i class="bi bi-shield-check"></i></div>
+        <h5 class="fw-bold">Secure & Reliable</h5>
+        <p>Built on Django with modern security and fast performance in mind.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5 text-center" style="background-color: #EEF2FF;">
+  <div class="container">
+    <h2 class="fw-bold mb-3">Start Splitting Smarter Today</h2>
+    <p class="mb-4">No sign-up required to get started. Just invite by email and manage your group easily.</p>
+    <a href="{% url 'create_group' %}" class="btn btn-brand btn-lg px-4">Get Started</a>
+  </div>
+</section>
+{% endblock %}
