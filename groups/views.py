@@ -53,7 +53,10 @@ def add_member(request, group_id):
                 GroupMember.objects.create(group=group, user=user)
                 messages.success(request, f"{user.email} added to group.")
         except User.DoesNotExist:
-            messages.error(request, "User not found.")
+            signup_link = f"{request.scheme}://{request.get_host()}/signup/?email={email}&group_id={group.id}"
+            messages.warning(request, f"No user found with email {email}. Share this signup link: {signup_link}")
+
+            # messages.error(request, "User not found.")
             
     return redirect('group_detail', pk=group_id)
 

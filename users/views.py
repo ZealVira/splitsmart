@@ -16,27 +16,45 @@ def index(request):
     groups = Group.objects.filter(Q(created_by=request.user) | Q(id__in=member)).order_by('-created_at')
     return render(request, 'index.html', {'groups': groups, 'group_admin': group_admin})
 
+
+
 def signup_view(request):
     if request.method == 'POST':
         username = request.POST['username']
         email = request.POST['email']
         password = request.POST['password']
         confirm_password = request.POST['confpassword']
-
+        group_id = request.POST.get('group_id')
+        
         if password != confirm_password:
             messages.error(request, "Passwords do not match.")
-            return render(request, 'signup.html')
-        
+            return render(request, 'signup.html', {'prefilled_email': email})
+
         if User.objects.filter(email=email).exists():
             messages.error(request, "Email already exists.")
-            return render(request, 'signup.html')
-        
+            return render(request, 'signup.html', {'prefilled_email': email})
+
         user = User.objects.create_user(username=username, email=email, password=password)
-        user.save()
+
+        print('hhhhhhhhhh',group_id)
+        if group_id:
+            try:
+                group = Group.objects.get(id=int(group_id))
+                GroupMember.objects.create(group=group, user=user)
+                print(f'{email} added to grp')
+                messages.success(request, f'Added to group "{group.group_name}" successfully!')
+            except Group.DoesNotExist:
+
+                messages.warning(request, "Group not found. Created account, but couldn't join group.")
+
         messages.success(request, "Account created successfully. Please log in.")
-        print("User created successfully")
         return redirect('login')
-    return render(request, 'signup.html')
+    else:
+        getEmail = request.GET.get('email', '')
+    #     #group_id = request.GET.get('group_id', '')
+
+    
+        return render(request, 'signup.html', {'prefilled_email': getEmail})
 
 
 def login_view(request):
