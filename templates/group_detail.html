@@ -139,6 +139,8 @@
         <button class="btn btn-outline-primary" disabled>
           <i class="bi bi-plus-circle me-1"></i> Add Expense
         </button>
+        <button class="btn btn-brand" data-bs-toggle="modal"
+         data-bs-target="#addExpenseModal">+ Add Expense</button>
       </div>
     </div>
   </div>
@@ -195,5 +197,61 @@
     </div>
   </div>
 </div>
+
+<!-- Add Expense Modal -->
+<div class="modal fade" id="addExpenseModal" tabindex="-1" aria-labelledby="addExpenseModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content rounded-4 shadow">
+      <form method="POST" action="{% url 'add_expense' group.id %}">
+        {% csrf_token %}
+        <div class="modal-header">
+          <h5 class="modal-title" id="addExpenseModalLabel">Add Expense</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="mb-3">
+            <label class="form-label">Title / Note</label>
+            <input type="text" name="description" class="form-control" placeholder="e.g. Dinner at Pizza Hut">
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Amount</label>
+            <input type="number" name="amount" step="0.01" class="form-control" placeholder="₹ Amount" required>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Share With</label>
+            <div class="form-check">
+              {% for member in members %}
+                <div class="row align-items-center mb-1">
+                  <div class="col-md-4">
+                    <input class="form-check-input" type="checkbox" name="shared_with" value="{{ member.user.id }}" id="user{{ forloop.counter }}">
+                    <label class="form-check-label" for="user{{ forloop.counter }}">{{ member.user.username }}</label>
+                  </div>
+                  <div class="col-md-4">
+                    <input type="number" step="0.01" class="form-control manual-amount" name="amounts_{{ member.user.id }}" placeholder="Custom amount (optional)">
+                  </div>
+                </div>
+              {% endfor %}
+              <div class="form-text">Leave custom amount blank to auto-split equally.</div>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label">Paid by (You)</label>
+            <input type="text" class="form-control" value="{{ request.user.username }}" disabled>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Add Expense</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}

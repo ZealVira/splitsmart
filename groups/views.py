@@ -25,15 +25,31 @@ def create_group(request):
 
     return render(request, 'index.html')
 
+@login_required(login_url='login')
 def group_detail(request, pk):
     group = get_object_or_404(Group, pk=pk)
-    members = GroupMember.objects.filter(group=group).select_related('user')
+    members_qs = GroupMember.objects.filter(group=group).select_related('user')
+
+    # Actual members (excluding admin)
+    members = members_qs
+
+    # All members (including admin)
+    all_member_ids = list(members_qs.values_list('user_id', flat=True))
+    if group.created_by.id not in all_member_ids:
+        all_member_ids.append(group.created_by.id)
+        print(all_member_ids)
+    
+    all_members = User.objects.filter(id__in=all_member_ids)
+    print(all_members)
     is_admin = request.user == group.created_by
+
     return render(request, 'group_detail.html', {
         'group': group,
         'members': members,
+        'all_members': all_members,  # ✅ for checkboxes etc.
         'is_admin': is_admin
     })
+
 
 @login_required(login_url='login')
 def add_member(request, group_id):
