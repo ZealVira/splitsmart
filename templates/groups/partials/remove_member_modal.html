@@ -1,0 +1,55 @@
+{% load static %}
+
+
+<div class="modal fade" id="removeMemberModal-{{ group.id }}" tabindex="-1"
+  aria-labelledby="removeMemberModalLabel-{{ group.id }}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content rounded-4 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title" id="removeMemberModalLabel-{{ group.id }}">Remove Member from {{ group.group_name }}</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        {% with group.groupmember_set.all as members %}
+        {% if members %}
+        <ul class="list-group">
+          {% for member in members %}
+          {% if member.user != request.user %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+              {% if member.user.profile.avatar %}
+              <img src="{{ member.user.profile.avatar.url }}" 
+                   class="rounded-circle me-2" 
+                   width="32" 
+                   height="32"
+                   alt="{{ member.user.username }}"
+                   onerror="this.onerror=null;this.src='{% static 'images/default-avatar.svg' %}'">
+              {% else %}
+              <div class="avatar-placeholder rounded-circle me-2 d-flex align-items-center justify-content-center bg-primary-soft text-primary" 
+                   style="width: 32px; height: 32px;">
+                {{ member.user.username|first|upper }}
+              </div>
+              {% endif %}
+              {{ member.user.username }}
+            </div>
+            <form method="POST" action="{% url 'remove_member' group.id member.user.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-outline-danger" title="Remove">
+                <i class="bi bi-trash"></i>
+              </button>
+            </form>
+          </li>
+          {% endif %}
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-muted">No members in this group.</p>
+        {% endif %}
+        {% endwith %}
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
