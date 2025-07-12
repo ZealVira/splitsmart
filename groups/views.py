@@ -34,7 +34,7 @@ def group_detail(request, pk):
     members = members_qs
 
     # All members (including admin)
-    all_member_ids = list(members_qs.values_list('user_id', flat=True))
+    all_member_ids = list(members_qs.values_list('user', flat=True))
     if group.created_by.id not in all_member_ids:
         all_member_ids.append(group.created_by.id)
         print(all_member_ids)
@@ -46,7 +46,7 @@ def group_detail(request, pk):
     return render(request, 'group_detail.html', {
         'group': group,
         'members': members,
-        'all_members': all_members,  # ✅ for checkboxes etc.
+        'all_members': all_members,
         'is_admin': is_admin
     })
 

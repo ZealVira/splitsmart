@@ -113,7 +113,7 @@
          width="50" 
          height="50"
          alt="{{ user.get_full_name|default:user.username }}'s avatar"
-         onerror="this.onerror=null;this.src='{% static 'images/default-avatar.svg' %}'">
+         onerror="this.onerror=null;this.src='{% static 'images/default-avatar.svg' %}';">
 {% else %}
     <div class="avatar-placeholder rounded-circle me-3 d-flex align-items-center justify-content-center bg-primary text-white" 
          style="width: 50px; height: 50px;">
