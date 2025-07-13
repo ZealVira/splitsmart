@@ -1,11 +1,21 @@
-from django.contrib import admin
-from django.urls import path, include
+from django.contrib.auth import views as auth_views
+from django.urls import path
+
 from . import views
 
+app_name = "users"
+
 urlpatterns = [
-    path('index', views.index, name='index'),
-    path('signup/', views.signup_view, name='signup'),
-    path('login', views.login_view, name='login'),
-    path('logout', views.logout_view, name='logout'),
-    path('', views.landing_view, name='landing_view'),
+    path("", views.home, name="home"),
+    path("signup/", views.signup, name="signup"),
+    path(
+        "login/",
+        auth_views.LoginView.as_view(
+            template_name="users/login.html",
+            redirect_authenticated_user=True,
+        ),
+        name="login",
+    ),
+    path("logout/", views.logout_view, name="logout"),
+    path("profile/", views.profile, name="profile"),
 ]
