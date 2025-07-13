@@ -63,3 +63,5 @@ build/
 dist/
 *.egg-info/
 .eggs/
+
+.ruff_cache

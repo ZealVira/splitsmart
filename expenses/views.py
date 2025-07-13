@@ -1,34 +1,72 @@
-from django.http import HttpResponseForbidden
-from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
-from django.contrib.auth.decorators import login_required
+from decimal import Decimal, InvalidOperation
+
 from django.contrib import messages
-from django.contrib.auth import get_user_model
-from groups.models import Group, GroupMember
-from .models import Expense, Payment
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_http_methods
+
+from groups.models import Group
+
+from .forms import ExpenseForm
+from .models import Expense, ExpenseShare
 
 
-User = get_user_model()
+@login_required
+@require_http_methods(["GET", "POST"])
+def create_expense(request, pk):
+    """Full page for adding an expense."""
+    group = get_object_or_404(Group, pk=pk, members=request.user)
 
-@login_required(login_url='login')
-def add_expense(request, pk):
-    group = get_object_or_404(Group, pk=pk)
+    if request.method == "POST":
+        form = ExpenseForm(group, request.POST)
+        if form.is_valid():
+            cd = form.cleaned_data
 
-    if request.method == 'POST':
-        description = request.POST['description']
-        amount = request.POST['amount']
-        paid_by_id = request.POST['paid_by']
-        # print(paid_by_id)
-        paid_by = User.objects.get(id = paid_by_id)
-        
-        shared_with = request.POST.getlist('shared_with[]')
+            # create expense header
+            expense = Expense.objects.create(
+                group=group,
+                description=cd["description"],
+                amount=cd["amount"],
+                paid_by=cd["paid_by"],
+            )
 
-        if not shared_with:
-            messages.error(request, "Please select at least one member to share the expense with.")
-            return redirect('group_detail', pk=pk)
-        
-        expense = Expense.objects.create(group=group, paid_by=paid_by, amount=amount, description=description)
-        expense.save()
-        messages.success(request, "expense created successfully")
-    
-    return redirect('group_detail', pk=pk)
+            shared_users = cd["shared_with"]
+            total = cd["amount"]
+            count = shared_users.count()
+
+            custom_amounts = request.POST.getlist("amounts")
+
+            if len(custom_amounts) == count:
+                valid = True
+                amounts = []
+                for val in custom_amounts:
+                    try:
+                        amount = Decimal(val.strip())
+                        amounts.append(amount)
+                    except (InvalidOperation, ValueError):
+                        valid = False
+                        break
+
+                if valid:
+                    for user, amount in zip(shared_users, amounts):
+                        ExpenseShare.objects.create(expense=expense, user=user, amount_owed=amount)
+                else:
+                    expense.delete()  # clean up orphaned expense
+                    messages.error(
+                        request, "Invalid amount(s) entered. Please enter valid numbers."
+                    )
+                    return render(
+                        request, "expenses/create_expense.html", {"form": form, "group": group}
+                    )
+            else:
+                # fallback to equal split
+                split = total / count
+                for user in shared_users:
+                    ExpenseShare.objects.create(expense=expense, user=user, amount_owed=split)
+
+            messages.success(request, "Expense added.")
+            return redirect("groups:detail", pk=pk)
+    else:
+        form = ExpenseForm(group)
+
+    return render(request, "expenses/create_expense.html", {"form": form, "group": group})

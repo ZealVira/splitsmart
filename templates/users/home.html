@@ -1,0 +1,506 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Welcome to SplitSmart | Smart Group Expense Sharing{% endblock %}
+
+{% block extra_css %}
+<style>
+  /* Hero Section Enhancements */
+  .hero-section {
+    background: var(--gradient-primary);
+    position: relative;
+    overflow: hidden;
+    min-height: 70vh;
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><circle cx="200" cy="200" r="100" fill="rgba(255,255,255,0.1)"/><circle cx="800" cy="800" r="150" fill="rgba(255,255,255,0.05)"/><circle cx="900" cy="300" r="80" fill="rgba(255,255,255,0.08)"/></svg>');
+    opacity: 0.3;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .hero-title {
+    font-size: clamp(2.5rem, 5vw, 4rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.25rem;
+    opacity: 0.9;
+    margin-bottom: 2rem;
+  }
+
+  .hero-illustration {
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-illustration img {
+    filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.1));
+    animation: float 6s ease-in-out infinite;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  /* Feature Cards */
+  .feature-card {
+    transition: var(--transition);
+    border: 1px solid transparent;
+    height: 100%;
+  }
+
+  .feature-card:hover {
+    border-color: var(--bs-primary);
+  }
+
+  .feature-icon {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+    border-radius: 50%;
+    transition: var(--transition);
+  }
+
+  .feature-card:hover .feature-icon {
+    transform: scale(1.1);
+  }
+
+  /* Section Styling */
+  .section-padding {
+    padding: 5rem 0;
+  }
+
+  .section-title {
+    font-size: clamp(2rem, 4vw, 3rem);
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .section-subtitle {
+    font-size: 1.125rem;
+    color: var(--bs-secondary);
+    margin-bottom: 3rem;
+  }
+
+  /* Dashboard Preview Section */
+  .dashboard-preview {
+    background: var(--gradient-secondary);
+    border-radius: var(--border-radius);
+    padding: 3rem 2rem;
+  }
+
+  .dashboard-preview img {
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+  }
+
+  .check-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .check-list li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    font-size: 1.1rem;
+  }
+
+  .check-list i {
+    font-size: 1.25rem;
+    margin-right: 1rem;
+    color: var(--bs-success);
+  }
+
+  /* Testimonial Section */
+  .testimonial-card {
+    background: var(--gradient-primary);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .testimonial-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="80" cy="20" r="20" fill="rgba(255,255,255,0.1)"/><circle cx="20" cy="80" r="15" fill="rgba(255,255,255,0.05)"/></svg>');
+    opacity: 0.3;
+  }
+
+  .testimonial-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  .avatar-placeholder {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    font-weight: 600;
+    font-size: 1.5rem;
+  }
+
+  .quote-icon {
+    font-size: 4rem;
+    opacity: 0.2;
+    color: white;
+  }
+
+  /* CTA Section */
+  .cta-section {
+    background: linear-gradient(135deg, #1F2937 0%, #111827 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .cta-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon points="0,0 1000,300 1000,1000 0,700" fill="rgba(99,102,241,0.1)"/></svg>');
+  }
+
+  .cta-content {
+    position: relative;
+    z-index: 2;
+  }
+
+  /* Animation Classes */
+  .animate-on-scroll {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: all 0.6s ease;
+  }
+
+  .animate-on-scroll.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .hero-section {
+      min-height: 60vh;
+      padding: 3rem 0;
+    }
+
+    .section-padding {
+      padding: 3rem 0;
+    }
+
+    .dashboard-preview {
+      padding: 2rem 1rem;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- HERO SECTION -->
+<section class="hero-section">
+  <div class="container">
+    <div class="row align-items-center g-5">
+      <div class="col-lg-6 hero-content">
+        <h1 class="hero-title text-white animate-on-scroll">
+          Split expenses <span class="text-warning">without</span> the headache
+        </h1>
+        <p class="hero-subtitle text-white animate-on-scroll">
+          Track shared costs, settle balances, and keep everyone on the same page with our smart expense splitting
+          platform.
+        </p>
+        <div class="d-flex flex-column flex-sm-row gap-3 animate-on-scroll">
+          {% if user.is_authenticated %}
+          <a href="{% url 'groups:create' %}" class="btn btn-light btn-lg px-4 fw-semibold">
+            <i class="bi bi-plus-circle me-2"></i>Create Your First Group
+          </a>
+          <a href="{% url 'groups:list' %}" class="btn btn-outline-light btn-lg px-4">
+            <i class="bi bi-grid-3x3-gap me-2"></i>View Dashboard
+          </a>
+          {% else %}
+          <a href="{% url 'users:signup' %}" class="btn btn-light btn-lg px-4 fw-semibold">
+            <i class="bi bi-person-plus me-2"></i>Get Started Free
+          </a>
+          <a href="#features" class="btn btn-outline-light btn-lg px-4">
+            <i class="bi bi-info-circle me-2"></i>Learn More
+          </a>
+          {% endif %}
+        </div>
+      </div>
+      <div class="col-lg-6 hero-illustration animate-on-scroll">
+        <div class="text-center">
+          <div class="bg-white rounded-circle p-4 shadow-custom mx-auto"
+            style="width: 200px; height: 200px; display: flex; align-items: center; justify-content: center;">
+            <i class="bi bi-currency-exchange text-primary" style="font-size: 5rem;"></i>
+          </div>
+          <div class="mt-4">
+            <div class="d-flex justify-content-center gap-3">
+              <div class="bg-white rounded-circle p-3 shadow-custom-sm">
+                <i class="bi bi-people-fill text-success" style="font-size: 1.5rem;"></i>
+              </div>
+              <div class="bg-white rounded-circle p-3 shadow-custom-sm">
+                <i class="bi bi-calculator-fill text-info" style="font-size: 1.5rem;"></i>
+              </div>
+              <div class="bg-white rounded-circle p-3 shadow-custom-sm">
+                <i class="bi bi-check-circle-fill text-warning" style="font-size: 1.5rem;"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES SECTION -->
+<section id="features" class="section-padding">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="section-title animate-on-scroll">How SplitSmart Works</h2>
+      <p class="section-subtitle mx-auto animate-on-scroll" style="max-width: 700px;">
+        Everything you need to manage group expenses fairly and efficiently
+      </p>
+    </div>
+
+    <div class="row g-4">
+      <!-- Feature 1 -->
+      <div class="col-md-4 animate-on-scroll">
+        <div class="card feature-card text-center p-4">
+          <div class="feature-icon bg-primary bg-opacity-10 text-primary">
+            <i class="bi bi-people-fill fs-2"></i>
+          </div>
+          <h3 class="h4 mb-3">Create Groups</h3>
+          <p class="text-muted mb-0">
+            Set up a group in seconds and invite friends, family, or colleagues to start tracking expenses together.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="col-md-4 animate-on-scroll">
+        <div class="card feature-card text-center p-4">
+          <div class="feature-icon bg-success bg-opacity-10 text-success">
+            <i class="bi bi-receipt fs-2"></i>
+          </div>
+          <h3 class="h4 mb-3">Track Expenses</h3>
+          <p class="text-muted mb-0">
+            Add expenses with photos, receipts, and detailed descriptions. Split costs evenly or customize shares.
+          </p>
+        </div>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="col-md-4 animate-on-scroll">
+        <div class="card feature-card text-center p-4">
+          <div class="feature-icon bg-info bg-opacity-10 text-info">
+            <i class="bi bi-calculator-fill fs-2"></i>
+          </div>
+          <h3 class="h4 mb-3">Auto-Calculate</h3>
+          <p class="text-muted mb-0">
+            Let our smart algorithm calculate who owes what and suggest the most efficient way to settle up.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- DASHBOARD PREVIEW SECTION -->
+<section class="section-padding">
+  <div class="container">
+    <div class="dashboard-preview">
+      <div class="row align-items-center g-5">
+        <div class="col-lg-6 order-lg-2 animate-on-scroll">
+          <div class="text-center">
+            <div class="bg-white rounded shadow-custom p-4">
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <h5 class="mb-0">Trip to Goa</h5>
+                <span class="badge bg-success">Active</span>
+              </div>
+              <div class="row g-3 text-center">
+                <div class="col-4">
+                  <div class="p-3 bg-light rounded">
+                    <i class="bi bi-people-fill text-primary fs-4"></i>
+                    <p class="mb-0 mt-2 small">5 Members</p>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-3 bg-light rounded">
+                    <i class="bi bi-receipt text-success fs-4"></i>
+                    <p class="mb-0 mt-2 small">12 Expenses</p>
+                  </div>
+                </div>
+                <div class="col-4">
+                  <div class="p-3 bg-light rounded">
+                    <i class="bi bi-currency-rupee text-info fs-4"></i>
+                    <p class="mb-0 mt-2 small">₹15,240</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col-lg-6 animate-on-scroll">
+          <h2 class="section-title">Your groups at a glance</h2>
+          <p class="section-subtitle">
+            See all your shared expenses in one clean, organized dashboard with real-time updates.
+          </p>
+          <ul class="check-list mb-4">
+            <li>
+              <i class="bi bi-check-circle-fill"></i>
+              Real-time balance updates and notifications
+            </li>
+            <li>
+              <i class="bi bi-check-circle-fill"></i>
+              Detailed expense history and analytics
+            </li>
+            <li>
+              <i class="bi bi-check-circle-fill"></i>
+              Smart settlement suggestions
+            </li>
+            <li>
+              <i class="bi bi-check-circle-fill"></i>
+              Export reports and receipts
+            </li>
+          </ul>
+          {% if user.is_authenticated %}
+          <a href="{% url 'groups:create' %}" class="btn btn-primary btn-lg px-4">
+            <i class="bi bi-plus-circle me-2"></i>Create Your First Group
+          </a>
+          {% else %}
+          <a href="{% url 'users:signup' %}" class="btn btn-primary btn-lg px-4">
+            <i class="bi bi-person-plus me-2"></i>Start Your First Group
+          </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIAL SECTION -->
+<section class="section-padding">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-8 animate-on-scroll">
+        <div class="testimonial-card">
+          <div class="testimonial-content p-5">
+            <div class="d-flex align-items-center mb-4">
+              <i class="bi bi-quote quote-icon me-3"></i>
+              <h3 class="text-white mb-0">What our users say</h3>
+            </div>
+            <blockquote class="blockquote mb-4">
+              <p class="fs-4 text-white mb-0">
+                "SplitSmart saved our friend group so many awkward money conversations. Now we can focus on having fun
+                instead of worrying about who owes what!"
+              </p>
+            </blockquote>
+            <div class="d-flex align-items-center">
+              <div class="avatar-placeholder rounded-circle me-3 d-flex align-items-center justify-content-center">
+                S
+              </div>
+              <div>
+                <p class="text-white mb-0 fw-semibold">Sarah K.</p>
+                <small class="text-white opacity-75">Frequent User • Mumbai</small>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FINAL CTA SECTION -->
+<section class="cta-section section-padding">
+  <div class="container text-center">
+    <div class="cta-content">
+      <h2 class="section-title text-white animate-on-scroll">
+        Ready to simplify your group expenses?
+      </h2>
+      <p class="section-subtitle text-white opacity-75 mx-auto animate-on-scroll" style="max-width: 600px;">
+        Join thousands of groups already using SplitSmart to manage their shared expenses effortlessly.
+      </p>
+      <div class="animate-on-scroll">
+        {% if user.is_authenticated %}
+        <a href="{% url 'groups:create' %}" class="btn btn-light btn-lg px-5 fw-semibold me-3">
+          <i class="bi bi-plus-circle me-2"></i>Create Your First Group
+        </a>
+        <a href="{% url 'groups:list' %}" class="btn btn-outline-light btn-lg px-5">
+          <i class="bi bi-grid-3x3-gap me-2"></i>View Dashboard
+        </a>
+        {% else %}
+        <a href="{% url 'users:signup' %}" class="btn btn-light btn-lg px-5 fw-semibold me-3">
+          <i class="bi bi-person-plus me-2"></i>Get Started – It's Free
+        </a>
+        <a href="{% url 'users:login' %}" class="btn btn-outline-light btn-lg px-5">
+          <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
+        </a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Scroll animation functionality
+  document.addEventListener('DOMContentLoaded', function () {
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function (entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all elements with animate-on-scroll class
+    document.querySelectorAll('.animate-on-scroll').forEach(el => {
+      observer.observe(el);
+    });
+  });
+
+</script>
+{% endblock %}
