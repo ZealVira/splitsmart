@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Add Expense – {{ group.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-header bg-transparent">
+          <h5 class="mb-0">Add Expense to <strong>{{ group.name }}</strong></h5>
+        </div>
+
+        <div class="card-body">
+          <form method="POST" action="{% url 'expenses:create' group.id %}" novalidate>
+            {% csrf_token %}
+
+            {% if messages %}
+              {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} mt-2">{{ message }}</div>
+              {% endfor %}
+            {% endif %}
+
+            <!-- Description -->
+            <div class="mb-3">
+              <label for="{{ form.description.id_for_label }}" class="form-label">Title / Note</label>
+              {{ form.description }}
+              {% if form.description.errors %}
+                <div class="text-danger small">{{ form.description.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Amount -->
+            <div class="mb-3">
+              <label for="{{ form.amount.id_for_label }}" class="form-label">Amount</label>
+              {{ form.amount }}
+              {% if form.amount.errors %}
+                <div class="text-danger small">{{ form.amount.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Paid by -->
+            <div class="mb-3">
+              <label for="{{ form.paid_by.id_for_label }}" class="form-label">Paid by</label>
+              {{ form.paid_by }}
+              {% if form.paid_by.errors %}
+                <div class="text-danger small">{{ form.paid_by.errors }}</div>
+              {% endif %}
+            </div>
+
+            <!-- Share with -->
+            <label class="form-label">Share with</label>
+            {% for checkbox in form.shared_with %}
+              <div class="row align-items-center mb-2">
+                <div class="col-md-6">
+                  {{ checkbox.tag }}
+                  <label for="{{ checkbox.id_for_label }}" class="ms-1">{{ checkbox.choice_label }}</label>
+                </div>
+                <div class="col-md-6">
+                  <input type="number" step="0.01"
+                         name="amounts"
+                         class="form-control manual-amount"
+                         placeholder="Split amount (optional)">
+                </div>
+              </div>
+            {% endfor %}
+            {% if form.shared_with.errors %}
+              <div class="text-danger small">{{ form.shared_with.errors }}</div>
+            {% endif %}
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <a href="{% url 'groups:detail' group.id %}" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">Add Expense</button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Optional: Toggle readonly state if user checks a box
+  document.querySelectorAll("input[name='shared_with']").forEach((checkbox, index) => {
+    checkbox.addEventListener("change", () => {
+      const amountInput = document.querySelectorAll(".manual-amount")[index];
+      amountInput.readOnly = !checkbox.checked;
+      if (!checkbox.checked) amountInput.value = "";
+    });
+  });
+</script>
+{% endblock %}
