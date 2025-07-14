@@ -40,6 +40,8 @@ def group_detail(request, pk):
         print(all_member_ids)
     
     all_members = User.objects.filter(id__in=all_member_ids)
+    print(members)
+    print("-----------------------------------------------")
     print(all_members)
     is_admin = request.user == group.created_by
 
