@@ -6,6 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .models import Group, GroupMember
 from expenses.models import Expense  # Import from other app
+from django.db.models import Sum
 
 
 User = get_user_model()
@@ -30,8 +31,8 @@ def create_group(request):
 @login_required(login_url='login')
 def group_detail(request, pk):
     group = get_object_or_404(Group, pk=pk)
-    expenses = Expense.objects.filter(group=group)
-    
+    expenses = Expense.objects.filter(group=group).order_by('-created_at')
+
     members_qs = GroupMember.objects.filter(group=group).select_related('user')
 
     # Actual members (excluding admin)
@@ -41,12 +42,13 @@ def group_detail(request, pk):
     all_member_ids = list(members_qs.values_list('user', flat=True))
     if group.created_by.id not in all_member_ids:
         all_member_ids.append(group.created_by.id)
-        print(all_member_ids)
+        # print(all_member_ids)
     
     all_members = User.objects.filter(id__in=all_member_ids)
-    print(members)
-    print("-----------------------------------------------")
-    print(all_members)
+    
+    member_own = Expense.objects.filter(group=group).aggregate(total=Sum('amount'))['total'] or 0
+
+
     is_admin = request.user == group.created_by
 
     return render(request, 'group_detail.html', {
@@ -54,8 +56,15 @@ def group_detail(request, pk):
         'members': members,
         'all_members': all_members,
         'is_admin': is_admin,
-        'expenses': expenses
+        'expenses': expenses,
+        'group_total' : member_own
     })
+
+
+
+
+
+
 
 
 @login_required(login_url='login')
