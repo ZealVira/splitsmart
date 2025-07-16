@@ -5,6 +5,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .models import Group, GroupMember
+from expenses.models import Expense  # Import from other app
+
 
 User = get_user_model()
 
@@ -28,6 +30,8 @@ def create_group(request):
 @login_required(login_url='login')
 def group_detail(request, pk):
     group = get_object_or_404(Group, pk=pk)
+    expenses = Expense.objects.filter(group=group)
+    
     members_qs = GroupMember.objects.filter(group=group).select_related('user')
 
     # Actual members (excluding admin)
@@ -49,7 +53,8 @@ def group_detail(request, pk):
         'group': group,
         'members': members,
         'all_members': all_members,
-        'is_admin': is_admin
+        'is_admin': is_admin,
+        'expenses': expenses
     })
 
 

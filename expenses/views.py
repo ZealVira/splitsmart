@@ -32,3 +32,4 @@ def add_expense(request, pk):
         messages.success(request, "expense created successfully")
     
     return redirect('group_detail', pk=pk)
+

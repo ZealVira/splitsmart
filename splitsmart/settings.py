@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import dj_database_url
 import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -26,6 +27,7 @@ SECRET_KEY = 'django-insecure-kx@*d5me#4gnq_v30prn$hlhfa5+qvagjvf8pn0p(wrzal1%lf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
+# ALLOWED_HOSTS = ['.onrender.com']
 ALLOWED_HOSTS = []
 
 AUTH_USER_MODEL = 'users.User'  # Custom user model
