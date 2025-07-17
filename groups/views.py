@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .models import Group, GroupMember
-from expenses.models import Expense  # Import from other app
+from expenses.models import Expense, Payment  # Import from other app
 from django.db.models import Sum
 
 
@@ -31,7 +31,7 @@ def create_group(request):
 @login_required(login_url='login')
 def group_detail(request, pk):
     group = get_object_or_404(Group, pk=pk)
-    expenses = Expense.objects.filter(group=group).order_by('-created_at')
+    expenses = Expense.objects.filter(group=group).order_by('-created_at')[:5]
 
     members_qs = GroupMember.objects.filter(group=group).select_related('user')
 
@@ -48,7 +48,18 @@ def group_detail(request, pk):
     
     member_own = Expense.objects.filter(group=group).aggregate(total=Sum('amount'))['total'] or 0
 
+    # Total user is owed (others paid to user)
+    total_owed = Payment.objects.filter(
+        group=group, to_user=request.user, is_settled=False
+    ).aggregate(total=Sum('amount'))['total'] or 0
 
+    # Total user owes (user paid to others)
+    total_owes = Payment.objects.filter(
+        group=group, from_user=request.user, is_settled=False
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    net_balance = total_owed - total_owes
+    
     is_admin = request.user == group.created_by
 
     return render(request, 'group_detail.html', {
@@ -57,14 +68,13 @@ def group_detail(request, pk):
         'all_members': all_members,
         'is_admin': is_admin,
         'expenses': expenses,
-        'group_total' : member_own
+        'group_total' : member_own,
+        'balance': {
+            'net': net_balance,
+            'owes': total_owes,
+            'owed': total_owed,
+        },
     })
-
-
-
-
-
-
 
 
 @login_required(login_url='login')

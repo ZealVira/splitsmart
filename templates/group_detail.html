@@ -94,7 +94,7 @@
       </div>
       <div class="col-md-4">
         <div class="bg-surface p-3 text-center">
-          <div class="fs-4 fw-bold">{{ members|length }}</div>
+          <div class="fs-4 fw-bold">{{ all_members|length  }}</div>
           <div class="small text-muted">Members</div>
         </div>
       </div>
@@ -207,6 +207,9 @@
             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addExpenseModal">
               <i class="bi bi-plus me-2"></i>Add
             </button>
+            <a href="{% url 'view_all_expenses' group.id %}">
+              <i class="bi bi-eye"></i>View All
+            </a>
           </div>
           
           {% if expenses %}

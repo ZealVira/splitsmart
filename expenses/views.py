@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from groups.models import Group, GroupMember
 from .models import Expense, Payment
-
+import calendar
 
 User = get_user_model()
 
@@ -62,5 +62,21 @@ def add_expense(request, pk):
 
 
 def view_all_expenses(request, pk):
-    group = get_object_or_404(Group, pk)
-    return redirect('group_detail')
+    group = get_object_or_404(Group, pk=pk)
+    expenses = Expense.objects.filter(group=group).order_by('-created_at')
+    month_choices = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+    return render(request, 'groups/view_expenses.html', {'group': group, 'expenses': expenses, 'month_choices': month_choices})
+
+
+def view_for_month(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+    month_choices = [(i, calendar.month_name[i]) for i in range(1, 13)]
+
+    # print(month_choices)
+    month = int(request.GET.get('month', 1))  # Default to January if no month is provided
+
+    if month < 1 or month > 12:
+        return HttpResponseForbidden("Invalid month")
+    expenses = Expense.objects.filter(group=group, created_at__month=month).order_by('-created_at')
+    return render(request, 'groups/view_expenses.html', {'group': group, 'expenses': expenses, 'month_choices': month_choices})
