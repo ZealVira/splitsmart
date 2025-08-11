@@ -80,3 +80,10 @@ def view_for_month(request, pk):
         return HttpResponseForbidden("Invalid month")
     expenses = Expense.objects.filter(group=group, created_at__month=month).order_by('-created_at')
     return render(request, 'groups/view_expenses.html', {'group': group, 'expenses': expenses, 'month_choices': month_choices})
+
+
+def view_pending_expenses(request, pk):
+    group = get_object_or_404(Group, pk=pk)
+    pending_expenses = Payment.objects.filter(to_user=request.user, group=group, is_settled=False).order_by('-created_at')
+    print(pending_expenses)
+    return render(request, 'group_detail.html', {'group': group, 'pending_expenses': pending_expenses})

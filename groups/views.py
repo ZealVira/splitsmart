@@ -62,6 +62,9 @@ def group_detail(request, pk):
     
     is_admin = request.user == group.created_by
 
+    pending_expenses = Payment.objects.filter(from_user=request.user, group=group, is_settled=False).order_by('-created_at')
+    print(pending_expenses)
+
     return render(request, 'group_detail.html', {
         'group': group,
         'members': members,
@@ -74,6 +77,7 @@ def group_detail(request, pk):
             'owes': total_owes,
             'owed': total_owed,
         },
+        'pending_expenses': pending_expenses
     })
 
 

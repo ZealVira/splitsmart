@@ -11,8 +11,16 @@ services:
         fromDatabase:
           name: django-app-db
           property: connectionString
+      - key: SECRET_KEY
+        generateValue: true
+      - key: WEB_CONCURRENCY
+        value: 4
+
 
 databases:
   - name: django-app-db
     plan: free
+    databaseName: django-app
+    user: root
+
 
