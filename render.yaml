@@ -20,7 +20,7 @@ services:
 databases:
   - name: django-app-db
     plan: free
-    databaseName: django-app
+    databaseName: django_app
     user: root
 
 
