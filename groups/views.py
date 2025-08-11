@@ -17,7 +17,11 @@ def create_group(request):
         group_name = request.POST.get('group_name')
         description = request.POST.get('description', '').strip()
         created_by = request.user
-
+        
+        if not group_name:
+            messages.error(request, "Group name is required.")
+            return redirect('index')
+        
         group = Group.objects.create(
             group_name=group_name,
             description=description,
