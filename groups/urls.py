@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from django.conf.urls import handler404
 
 urlpatterns = [
     path('create_group', views.create_group, name='create_group'),
@@ -11,3 +12,5 @@ urlpatterns = [
     path('<int:pk>/update_group_description', views.update_group_description, name='update_group_description')
 
 ]
+
+handler404 = views.page_not_found

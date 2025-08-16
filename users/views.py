@@ -1,21 +1,46 @@
 from django.shortcuts import render, redirect
 from .models import User
 from groups.models import Group, GroupMember
+from expenses.models import Payment
 from django.db.models import Q
 from django.contrib.auth import authenticate, login, logout 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+
 
 @login_required(login_url='login')
 def index(request):
     user = request.user
+    
     # list the groups created by the user
     group_admin = Group.objects.filter(created_by=user).values_list('id', flat=True)
-    print("User is admin in groups:", group_admin)
+    
     member = GroupMember.objects.filter(user=request.user).values_list('group_id', flat=True)
     groups = Group.objects.filter(Q(created_by=request.user) | Q(id__in=member)).order_by('-created_at')
-    return render(request, 'index.html', {'groups': groups, 'group_admin': group_admin})
+    
+    # Total amount user SHOULD RECEIVE (others owe user)
+    you_are_owed = Payment.objects.filter(
+        to_user=request.user,
+        is_settled=False
+    ).aggregate(total=Sum('amount'))['total'] or 0
 
+    # Total amount user OWES (user owes to others)
+    you_owe = Payment.objects.filter(
+        from_user=request.user,
+        is_settled=False
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # Net balance
+    net_balance = you_are_owed - you_owe
+    
+    return render(request, 'index.html', {
+        'groups': groups, 
+        'group_admin': group_admin,
+        'total_owed': you_are_owed,
+        'total_owes': you_owe,
+        'net_balance': net_balance
+    })
 
 
 def signup_view(request):
@@ -36,7 +61,6 @@ def signup_view(request):
 
         user = User.objects.create_user(username=username, email=email, password=password)
 
-        print('hhhhhhhhhh',group_id)
         if group_id:
             try:
                 group = Group.objects.get(id=int(group_id))
@@ -81,3 +105,24 @@ def logout_view(request):
 
 def landing_view(request):
     return render(request, 'landing.html')
+
+@login_required(login_url='login')
+def profile_view(request):
+    you_are_owed = Payment.objects.filter(
+        to_user=request.user,
+        is_settled=False
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # Total amount user OWES (user owes to others)
+    you_owe = Payment.objects.filter(
+        from_user=request.user,
+        is_settled=False
+    ).aggregate(total=Sum('amount'))['total'] or 0
+
+    # Net balance
+    net_balance = you_are_owed - you_owe
+    return render(request, 'profile.html', {
+        'you_are_owed': you_are_owed,
+        'you_owe': you_owe,
+        'net_balance': net_balance
+    })

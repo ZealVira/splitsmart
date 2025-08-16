@@ -4,6 +4,47 @@
 
 {% block content %}
 <section class="container py-5">
+  <!-- Overview Cards -->
+  <div class="row g-4 mb-5">
+    <div class="col-md-4">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted">You Owe</h6>
+          <h3 class="fw-bold text-danger">₹{{ total_owes|default:0 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted">You Are Owed</h6>
+          <h3 class="fw-bold text-success">₹{{ total_owed|default:0 }}</h3>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 justify-center ">
+      <div class="card text-center shadow-sm h-100">
+        <div class="card-body">
+          <h6 class="text-muted">Net Balance</h6>
+          <h3 class="fw-bold {% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %}">
+            ₹{{ net_balance|default:0 }}
+          </h3>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Spending Chart -->
+  <div class="card shadow-sm mb-5">
+    <div class="card-header">
+      <i class="bi bi-graph-up"></i> Spending by Group
+    </div>
+    <div class="card-body">
+      <canvas id="spendingChart" height="120"></canvas>
+    </div>
+  </div>
+
+
   <div class="d-flex flex-column flex-md-row justify-content-between align-items-center mb-5">
     <h1 class="fw-bold mb-3 mb-md-0">
       <i class="bi bi-people-fill text-primary me-2"></i>My Groups

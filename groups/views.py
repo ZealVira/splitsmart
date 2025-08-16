@@ -34,22 +34,30 @@ def create_group(request):
 
 @login_required(login_url='login')
 def group_detail(request, pk):
+    user = request.user
     group = get_object_or_404(Group, pk=pk)
     expenses = Expense.objects.filter(group=group).order_by('-created_at')[:5]
 
     members_qs = GroupMember.objects.filter(group=group).select_related('user')
-
+    
     # Actual members (excluding admin)
     members = members_qs
-
+    
     # All members (including admin)
     all_member_ids = list(members_qs.values_list('user', flat=True))
+   
     if group.created_by.id not in all_member_ids:
         all_member_ids.append(group.created_by.id)
         # print(all_member_ids)
     
     all_members = User.objects.filter(id__in=all_member_ids)
-    
+
+    print("\n\n\n", all_members.values_list('email', flat=True))
+    if request.user.email not in all_members.values_list('email', flat=True):
+        messages.error(request, "You are not a member of this group.")
+        return render(request, "404.html", status=404)
+        # return redirect('page_not_found')
+
     member_own = Expense.objects.filter(group=group).aggregate(total=Sum('amount'))['total'] or 0
 
     # Total user is owed (others paid to user)
@@ -166,3 +174,8 @@ def update_group_description(request, pk):
     group.save()
     messages.success(request, "Description updated.")
     return redirect('group_detail', pk=pk)
+
+
+def page_not_found(request, exception=None):
+    return render(request, "404.html", status=404)
+

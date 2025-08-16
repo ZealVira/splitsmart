@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile | SplitSmart{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row g-4 justify-content-center">
+
+    <!-- Profile Card -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-custom fade-in h-100">
+        <div class="card-body text-center">
+          <!-- Avatar -->
+          <div class="mb-3">
+            <i class="bi bi-person-circle" style="font-size: 5rem; color: var(--bs-primary);"></i>
+          </div>
+
+          <!-- User Info -->
+          <h3 class="fw-bold mb-1">{{ user.get_full_name|default:user.username }}</h3>
+          <p class="text-muted mb-3">
+            <i class="bi bi-envelope me-2"></i>{{ user.email }}
+          </p>
+
+          <!-- Quick Stats -->
+          <div class="row text-center mb-4">
+            <div class="col-6 border-end">
+              <h5 class="fw-bold text-success">₹{{ you_are_owed|default:0 }}</h5>
+              <small class="text-muted">You are owed</small>
+            </div>
+            <div class="col-6">
+              <h5 class="fw-bold text-danger">₹{{ you_owe|default:0 }}</h5>
+              <small class="text-muted">You owe</small>
+            </div>
+          </div>
+
+          <!-- Actions -->
+          <a href="#" class="btn btn-outline-primary me-2">
+            <i class="bi bi-pencil-square me-1"></i> Edit Profile
+          </a>
+          <a href="{% url 'logout' %}" class="btn btn-outline-danger">
+            <i class="bi bi-box-arrow-right me-1"></i> Logout
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Settings Card -->
+    <div class="col-12 col-lg-6">
+      <div class="card shadow-custom-sm slide-up h-100">
+        <div class="card-header">
+          <i class="bi bi-gear me-2"></i> Account Settings
+        </div>
+        <div class="card-body">
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-key me-2"></i> Change Password</span>
+              <a href="#" class="btn btn-sm btn-outline-primary">Update</a>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-bell me-2"></i> Notifications</span>
+              <a href="#" class="btn btn-sm btn-outline-primary">Manage</a>
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+              <span><i class="bi bi-trash3 me-2"></i> Delete Account</span>
+              <a href="#" class="btn btn-sm btn-outline-danger">Delete</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
