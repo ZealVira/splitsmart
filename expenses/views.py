@@ -1,4 +1,5 @@
-from django.http import HttpResponseForbidden
+import json
+from django.http import HttpResponseForbidden, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.decorators.http import require_POST
 from django.contrib.auth.decorators import login_required
@@ -22,21 +23,30 @@ def add_expense(request, pk):
         print(split_type)
         paid_by = User.objects.get(id = paid_by_id)
         
-        shared_with = request.POST.getlist('shared_with')
-        print(shared_with)
-
-        
-        if not shared_with:
-            messages.error(request, "Please select at least one member to share the expense with.")
-            return redirect('group_detail', pk=pk)
-        
         shares = {}
 
-        if split_type == 'equal':
-            split_amount = round(int(amount) / len(shared_with), 2)
-            for uid in shared_with:
-                shares[uid] = split_amount
+        if(split_type == 'equal'):
+            group = get_object_or_404(Group, pk=pk)
+            members = GroupMember.objects.filter(group=group).select_related('user')
+
+            split_amount = round(int(amount) / len(members), 2)
+            for member in members:
+                shares[member.user.id] = split_amount
+
         else:
+            shared_with = request.POST.getlist('shared_with')
+            print(shared_with)
+
+            if not shared_with:
+                messages.error(request, "Please select at least one member to share the expense with.")
+                return redirect('group_detail', pk=pk)
+            
+            
+            # if split_type == 'equal':
+            #     split_amount = round(int(amount) / len(shared_with), 2)
+            #     for uid in shared_with:
+            #         shares[uid] = split_amount
+            # else:
             for uid in shared_with:
                 amt = request.POST.get(f'amounts_{uid}', '0').strip()
                 shares[uid] = float(amt or 0)
@@ -87,3 +97,28 @@ def view_pending_expenses(request, pk):
     pending_expenses = Payment.objects.filter(to_user=request.user, group=group, is_settled=False).order_by('-created_at')
     print(pending_expenses)
     return render(request, 'group_detail.html', {'group': group, 'pending_expenses': pending_expenses})
+
+
+@login_required
+def update_expense_status(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        payment_id = data.get("expense_id")
+        checked = data.get("checked")
+
+        try:
+            expense = Payment.objects.get(id=payment_id)
+            expense.is_settled = checked  # assuming you added this boolean field
+            expense.save()
+            
+            print(payment_id)
+            print(checked)
+
+            messages.success(request, "Expense status updated successfully.")
+            return JsonResponse({
+                "status": "success",
+                "expense_id": payment_id,
+                "checked": checked
+            })
+        except Payment.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Expense not found"}, status=404)

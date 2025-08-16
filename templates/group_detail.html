@@ -243,44 +243,45 @@
         </div>
       </div>
 
-      <div class="col-lg-8">
+      <div class="col-lg-6">
         <div class="bg-surface">
           <div class="card-header d-flex justify-content-between align-items-center">
             <h6 class="mb-0">Pending Expenses</h6>
-            <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
-              data-bs-target="#addExpenseModal">
-              <i class="bi bi-plus me-2"></i>Add
-            </button>
-            <!-- <a href="{% url 'view_pending_expenses' group.id %}">
-              <i class="bi bi-eye"></i>View All
-            </a> -->
+
           </div>
 
           {% if pending_expenses %}
           <div class="card-body">
             {% for exp in pending_expenses %}
-            <div class="d-flex justify-content-between align-items-center py-3 border-bottom last-0">
+            <div class="expense-item py-3 border-bottom">
 
-              <!-- Checkbox and description (left side) -->
-              <div class="d-flex align-items-start">
+              <!-- Checkbox + Expense details -->
+              <div class="d-flex">
                 <input type="checkbox" class="form-check-input me-3 mt-1" name="expense_checkbox" value="{{ exp.id }}">
-                <div>
-                  <div class="fw-semibold fs-6">{{ exp.description }}</div>
-                  <div class="fw-bold {% if exp.amount > 0 %}text-success{% else %}text-danger{% endif %}">
-                    ₹{{ exp.amount|floatformat:2 }}
+                
+                <div class="flex-grow-1">
+
+                  <!-- Expense Title -->
+                  <div class="fw-semibold">{{ exp.description }}</div>
+
+                  <!-- To user + Amount -->
+                  <div class="d-flex justify-content-between align-items-center">
+                    <div class="text-muted small">
+                      To: <span class="fw-semibold">{{ exp.to_user.full_name|default:exp.to_user.email }}</span>
+                    </div>
+                    <div class="fw-bold {% if exp.amount > 0 %}text-success{% else %}text-danger{% endif %}">
+                      ₹{{ exp.amount|floatformat:2 }}
+                    </div>
                   </div>
 
+                  <!-- Date -->
+                  <div class="text-muted small mt-1">
+                    {{ exp.created_at|date:"M d, Y" }}
+                  </div>
                 </div>
               </div>
 
-              <!-- To user info and amount (right side) -->
-              <div class="text-end">
-                <div class="fw-semibold">{{ exp.to_user.full_name|default:exp.to_user.email }}</div>
-                <div class="text-muted small">• {{ exp.created_at|date:"M d, Y" }}</div>
-              </div>
-
             </div>
-
             {% endfor %}
           </div>
 
@@ -289,15 +290,14 @@
             <i class="bi bi-receipt fs-2"></i>
             <h6 class="mt-2 mb-1">No expenses yet</h6>
             <p class="mb-3 small">Start tracking your group expenses</p>
-            <!-- Trigger Button -->
             <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
               data-bs-target="#addExpenseModal">
               <i class="bi bi-plus me-1"></i>Add
             </button>
-
           </div>
           {% endif %}
         </div>
+
       </div>
     </div>
   </div>
@@ -470,6 +470,34 @@
 
       updateSplit(); // on load
     });
+
+
+  document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll('input[name="expense_checkbox"]').forEach(cb => {
+      cb.addEventListener("change", function () {
+        let expenseId = this.value;   // <-- using your exp.id
+        let isChecked = this.checked; // true if checked, false if unchecked
+
+        fetch("{% url 'update_expense_status' %}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token }}"
+          },
+          body: JSON.stringify({
+            expense_id: expenseId,
+            checked: isChecked
+          })
+        })
+        .then(response => response.json())
+        .then(data => {
+          console.log("Server response:", data);
+        })
+        .catch(error => console.error("Error:", error));
+      });
+    });
+  });
+
   </script>
 
   {% endblock %}
